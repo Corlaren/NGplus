@@ -26,7 +26,9 @@ implements ActionListener, KeyListener{
 	
 	public int xPos = 100, yPos = 700, yMotion = 1, xMotion = 0, counter;
 	
-	public boolean xPlusStat = false, xMinusStat = false, yPlusStat = false, direction = true, jump = false, grounded = true;
+	public boolean xPlusStat = false, xMinusStat = false, yPlusStat = false, hitLeft = false, hitRight = false, hitTop = false;
+	
+	public boolean direction = true, grounded = true;
 	
 	public NGrenderer renderer;
 	
@@ -78,10 +80,10 @@ implements ActionListener, KeyListener{
 	
 	public void repaint(Graphics g) {
 
-		g.setColor(Color.black);
-		g.fillRect(0, 0, WIDTH, HEIGHT);
 		g.setColor(Color.green);
 		g.fillRect(xPos+1, yPos-1, 21, 24);
+		g.setColor(Color.black);
+		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
 		for (Rectangle obstcl : obstacles) {
 			
