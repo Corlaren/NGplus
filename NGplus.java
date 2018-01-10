@@ -26,7 +26,9 @@ implements ActionListener, KeyListener{
 	
 	public int xPos = 100, yPos = 700, yMotion = 1, xMotion = 0, counter;
 	
-	public boolean xPlusStat = false, xMinusStat = false, yPlusStat = false direction = true, grounded = true;
+	public boolean xPlusStat = false, xMinusStat = false, yPlusStat = false;
+	
+	public boolean direction = true, grounded = true;
 	
 	public NGrenderer renderer;
 	
