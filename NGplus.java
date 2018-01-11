@@ -24,24 +24,24 @@ implements ActionListener, KeyListener{
 	
 	public final int WIDTH = 800, HEIGHT = 800;
 	
-	public int xPos = 100, yPos = 700, yMotion = 1, xMotion = 0, counter;
+	public int xPos, yPos, yMotion, xMotion, counter, jumpCounter;
 	
-	public boolean xPlusStat = false, xMinusStat = false, yPlusStat = false;
-	
-	public boolean direction = true, grounded = true;
+	public boolean xPlusStat, xMinusStat, yPlusStat, hitLeft, hitRight, hitTop, direction, grounded, armed;
 	
 	public NGrenderer renderer;
 	
+	public Rectangle shadow;
+	
 	public Random rand;
 	
-	private BufferedImage heroIdleR, heroIdleL;
+	private BufferedImage heroIdleR, heroIdleL, heroIdleRAr, heroIdleLAr;
 	
 	public ArrayList<Rectangle> obstacles;
 	
 	public NGplus() {
 		
 		JFrame jframe = new JFrame();
-		Timer timer = new Timer(9, this);
+		Timer timer = new Timer(10, this);
 
 		renderer = new NGrenderer();
 		rand = new Random();
@@ -54,17 +54,38 @@ implements ActionListener, KeyListener{
 		jframe.setVisible(true);
 		jframe.addKeyListener(this);
 		
-
+		xPlusStat = false;
+		xMinusStat = false;
+		yPlusStat = false;
+		hitLeft = false;
+		hitRight = false;
+		hitTop = false;
+		armed = true;
+		direction = true;
+		grounded = true;
+		
+		xPos = 100;
+		yPos = 700;
+		yMotion = 1;
+		xMotion = 0;
+		counter = 0;
+		jumpCounter = 0;
+		
 		obstacles = new ArrayList<Rectangle>();
 		
-		obstacles.add(new Rectangle(0, 722, WIDTH, HEIGHT-722));
-		obstacles.add(new Rectangle(600, 700, WIDTH-700, HEIGHT-700));
-		obstacles.add(new Rectangle(10, 400, WIDTH-780, HEIGHT-400));
-		obstacles.add(new Rectangle(770, 400, WIDTH-780, HEIGHT-400));
+		obstacles.add(new Rectangle(0, 722, 800, 78));
+		obstacles.add(new Rectangle(600, 700, 20, 25));
+		obstacles.add(new Rectangle(530, 650, 20, 20));
+		obstacles.add(new Rectangle(470, 620, 20, 20));
+		obstacles.add(new Rectangle(510, 580, 20, 20));
+		obstacles.add(new Rectangle(10, 400, 20, 400));
+		obstacles.add(new Rectangle(770, 400, 20, 400));
 		
 		try {
 			heroIdleR = ImageIO.read(new File("Hero_idle_R.png"));
 			heroIdleL = ImageIO.read(new File("Hero_idle_L.png"));
+			heroIdleRAr = ImageIO.read(new File("Hero_idle_R_Armed.png"));
+			heroIdleLAr = ImageIO.read(new File("Hero_idle_L_Armed.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -80,8 +101,6 @@ implements ActionListener, KeyListener{
 	
 	public void repaint(Graphics g) {
 
-		g.setColor(Color.green);
-		g.fillRect(xPos+1, yPos-1, 21, 24);
 		g.setColor(Color.black);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
@@ -90,13 +109,17 @@ implements ActionListener, KeyListener{
 			paintObstacle(g, obstcl);
 		}
 		
+		
+		
 		if (direction) {
 			
-			g.drawImage(heroIdleR, xPos, yPos, null);
+			if (!armed) g.drawImage(heroIdleR, xPos, yPos, null);
+			else g.drawImage(heroIdleRAr, xPos, yPos, null);
 		}
 		else if (!direction) {
 
-			g.drawImage(heroIdleL, xPos, yPos, null);
+			if (!armed) g.drawImage(heroIdleL, xPos, yPos, null);
+			else g.drawImage(heroIdleLAr, xPos-9, yPos, null);
 		}
 		
 	}
@@ -104,30 +127,38 @@ implements ActionListener, KeyListener{
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		
-		if (counter == 5) {
+		if (counter == 12) {
 			
 			counter = 0;
+		}
+		if (jumpCounter == 48) {
+			
+			jumpCounter = 0;
 		}
 		
 		if (xPlusStat) {
 			
-			xMotion -= 1;
+			if (grounded) xMotion--;
+			else if (counter % 6 == 0) xMotion--;
 			direction = false;
 		}
 		
 		if (xMinusStat) {
 
-			xMotion += 1;
+			if (grounded) xMotion++;
+			else if (counter % 6 == 0) xMotion++;
 			direction = true;
 		}
 
 		if (yPlusStat && grounded) {
 
-			yPos -= 2;
-			yMotion = -10;
+			yPos--;
+			yMotion = -5;
+			jumpCounter = 1;
+			grounded = false;
 		}
 		
-		if (yMotion < 10 && counter % 2 == 1) {
+		if (yMotion < 10 && jumpCounter % 6 == 0) {
 			
 			yMotion++;
 		}
@@ -135,7 +166,6 @@ implements ActionListener, KeyListener{
 		if (yPos < 700) {
 			
 			yPos += yMotion;
-			grounded = false;
 			
 			if (yPos >= 700) {
 				
@@ -144,39 +174,61 @@ implements ActionListener, KeyListener{
 			}
 		}
 		
-		if (xMotion > 0 && counter == 0) {
+		if (xMotion > 2) {
 			
-			xMotion--;
+			xMotion = 2;
 		}
 		
-		if (xMotion < 0 && counter == 0) {
+		if (xMotion < -2) {
 			
-			xMotion++;
+			xMotion = -2;
 		}
 		
-		if (xMotion > 5) {
+		if (xMotion > 0 && !xMinusStat) {
 			
-			xMotion = 5;
+			if (grounded && counter %3 == 0) xMotion--;
+			else if (jumpCounter % 22 == 1) xMotion--;
 		}
 		
-		if (xMotion < -5) {
+		if (xMotion < 0 && !xPlusStat) {
 			
-			xMotion = -5;
+			if (grounded && counter %3 == 0) xMotion++;
+			else if (jumpCounter % 22 == 1) xMotion++;
 		}
 
 		counter++;
+		jumpCounter++;
 		xPos += xMotion;
-
-		if (xPos > 700) {
+		
+		shadow = new Rectangle(xPos+1, yPos-1, 21, 24);
+		
+		for (Rectangle obstcl : obstacles) {
 			
-			xPos = 700;
-			xMotion = 0;
-		}
-
-		if (xPos < 100) {
-			
-			xPos = 100;
-			xMotion = 0;
+			if (obstcl.intersects(shadow)) {
+				
+				if (shadow.x + (shadow.width / 2 + 2) < obstcl.x) {
+					
+					xPos = obstcl.x - shadow.width;
+					xMotion = 0;
+				}
+				
+				else if (shadow.x + (shadow.width / 2 - 2) > obstcl.x + obstcl.width) {
+					
+					xPos = obstcl.x + obstcl.width -1;
+					xMotion = 0;
+				}
+				else if (shadow.y > obstcl.y) {
+					
+					yPos = obstcl.y + obstcl.height;
+					yMotion = 0;
+				}
+				else {
+					
+					yPos = obstcl.y - 22;
+					yMotion = 0;
+					grounded = true;
+				}
+			}
 		}
 		
 		renderer.repaint();
@@ -203,7 +255,8 @@ implements ActionListener, KeyListener{
 			yPlusStat = true;
 		}
 		else if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
-			
+			if (armed) armed = false;
+			else armed = true;
 		}
 	}
 
