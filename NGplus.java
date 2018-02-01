@@ -42,6 +42,8 @@ implements ActionListener, KeyListener, MouseListener{
 	
 	public ArrayList<Rectangle> obstacles;
 	
+	public ArrayList<Bullet> bullets;
+	
 	public NGplus() {
 		
 		JFrame jframe = new JFrame();
@@ -92,6 +94,8 @@ implements ActionListener, KeyListener, MouseListener{
 		obstacles.add(new Rectangle(10, 400, 20, 400));
 		obstacles.add(new Rectangle(770, 400, 20, 400));
 		
+		bullets = new ArrayList<Bullet>();
+		
 		try {
 			heroIdleR = ImageIO.read(new File("HeroIdleR.png"));
 			heroIdleL = ImageIO.read(new File("HeroIdleL.png"));
@@ -110,9 +114,9 @@ implements ActionListener, KeyListener, MouseListener{
 	    aFrame.setSize(screenSize.width, screenSize.height);
 	}
 	
-	public void paintObstacle(Graphics g, Rectangle obstcl) {
+	public void paintObstacle(Graphics g, Rectangle obstcl, Color c) {
 		
-		g.setColor(Color.gray);
+		g.setColor(c);
 		g.fillRect(obstcl.x, obstcl.y, obstcl.width, obstcl.height);
 	}
 	
@@ -123,7 +127,13 @@ implements ActionListener, KeyListener, MouseListener{
 		
 		for (Rectangle obstcl : obstacles) {
 			
-			paintObstacle(g, obstcl);
+			paintObstacle(g, obstcl, Color.gray);
+		}
+		
+		for (Bullet bull : bullets) {
+			
+			bull.fly();
+			paintObstacle(g, bull.bulletshadow, Color.yellow);
 		}
 		
 		if (direction) {
@@ -252,8 +262,8 @@ implements ActionListener, KeyListener, MouseListener{
 			
 				for (int i = 1; i <= Math.max(Math.abs(xM), Math.abs(yM)); i++) {
 					
-					if (xMotion != 0) xCol = (int) (xP + (((xM * 1.001)/Math.max(Math.abs(xM), Math.abs(yM)))*i));
-					if (yMotion != 0) yCol = (int) (yP + (((yM * 1.001)/Math.max(Math.abs(xM), Math.abs(yM)))*i));
+					if (xMotion != 0) xCol = xP + (xM * i) / Math.max(Math.abs(xM), Math.abs(yM));
+					if (yMotion != 0) yCol = yP + (yM * i) / Math.max(Math.abs(xM), Math.abs(yM));
 					
 					shadow = new Rectangle(xCol + 8, yCol-1, 14, 59);
 			
@@ -277,7 +287,7 @@ implements ActionListener, KeyListener, MouseListener{
 						}
 						else {
 						
-							xPos = xCol + 2;
+							xPos = xCol + 1;
 							xMotion = 0;
 						}
 					}
@@ -349,27 +359,28 @@ implements ActionListener, KeyListener, MouseListener{
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent arg0) {
+	public void mouseClicked(MouseEvent e) {
 		
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent arg0) {
+	public void mouseEntered(MouseEvent e) {
 		
 	}
 
 	@Override
-	public void mouseExited(MouseEvent arg0) {
+	public void mouseExited(MouseEvent e) {
 		
 	}
 
 	@Override
-	public void mousePressed(MouseEvent arg0) {
+	public void mousePressed(MouseEvent e) {
 		
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		
+	public void mouseReleased(MouseEvent e) {
+
+		bullets.add(new Bullet(xPos,yPos,e.getX()-xPos-30,e.getY()-yPos-30));
 	}
 }
